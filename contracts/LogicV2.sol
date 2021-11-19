@@ -1,15 +1,16 @@
 pragma solidity ^0.8.0;
 
-import "./StorageSlot.sol";
+import "./Storage.sol";
 import "./Proxy.sol";
 
-contract LogicV2 is Proxy{
-  bool initialized;
-  uint256 magicNumber;
-  uint256 lightNumber;
+contract LogicV2 is Storage{
+
+  bool public initialized;
+  uint256 public magicNumber;
+  uint256 public lightNumber;
 
   function initialize() public {
-    require(!initialized, "already initialized");
+    require(!initialized, "implementation is already initialized");
 
     magicNumber = 0x42;
     initialized = true;
@@ -27,20 +28,28 @@ contract LogicV2 is Proxy{
     magicNumber = magicNumber / 2;
   }
 
-  function setDarkNumber(uint256 newDarkNumber) public {
-    StorageSlot.setDarkNumber(_DARK_NUMBER, newDarkNumber);
-  }
-
-  function getDarkNumber() public view returns (uint256) {
-    return StorageSlot.getDarkNumber(_DARK_NUMBER);
-  }
-
   function setLightNumber(uint256 newLightNumber) public {
     lightNumber = newLightNumber;
   }
 
   function getLightNumber() public view returns (uint256) {
     return lightNumber;
+  }
+
+  function updateSupply(uint256 _supply) public {
+    totalSupply = _supply;
+  }
+
+  function getTotalSupply() public view returns (uint256) {
+    return totalSupply;
+  }
+
+  function updateBalances(address _user, uint256 _balance) public {
+    balances[_user] += _balance;
+  }
+
+  function getBalances(address _user) public view returns (uint256) {
+    return balances[_user];
   }
 
 }

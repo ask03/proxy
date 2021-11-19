@@ -1,13 +1,14 @@
 require("@nomiclabs/hardhat-waffle");
 const { expect } = require("chai");
 
+
 describe("Proxy", async () => {
-  let owner;
+  let owner, other, other2;
   let proxy, logic;
   let proxied;
 
   beforeEach(async () => {
-    [owner] = await ethers.getSigners();
+    [owner, other, other2] = await ethers.getSigners();
 
     const Logic = await ethers.getContractFactory("Logic");
     logic = await Logic.deploy();
@@ -88,33 +89,41 @@ describe("Proxy", async () => {
         "function setMagicNumber(uint256 newMagicNumber) public",
         "function getMagicNumber() public view returns (uint256)",
         "function doMagic() public",
-        "function setDarkNumber(uint256 newDarkNumber) public",
-        "function getDarkNumber() public view returns (uint256)"
+        "function setLightNumber(uint256 newDarkNumber) public",
+        "function getLightNumber() public view returns (uint256)"
       ];
 
       proxied = new ethers.Contract(proxy.address, abi, owner);
 
-      await proxied.setDarkNumber("3");
-      expect(await proxied.getDarkNumber()).to.eq("3");
+      await proxied.setLightNumber("3");
+      expect(await proxied.getLightNumber()).to.eq("3");
 
     })
 
-    it("can add new storage from implementation", async () => {
+    it("can add new storage inherited in implementation", async () => {
       abi = [
         "function initialize() public",
         "function setMagicNumber(uint256 newMagicNumber) public",
         "function getMagicNumber() public view returns (uint256)",
         "function doMagic() public",
-        "function setDarkNumber(uint256 newDarkNumber) public",
-        "function getDarkNumber() public view returns (uint256)",
-        "function setLightNumber(uint256 newLightNumber) public",
-        "function getLightNumber() public view returns (uint256)"
+        "function setLightNumber(uint256 newDarkNumber) public",
+        "function getLightNumber() public view returns (uint256)",
+        "function updateSupply(uint256 _supply) public",
+        "function getTotalSupply() public view returns (uint256)",
+        "function updateBalances(address _user, uint256 _balance) public",
+        "function getBalances(address _user) public view returns (uint256)"
       ];
 
       proxied = new ethers.Contract(proxy.address, abi, owner);
 
       await proxied.setLightNumber("43");
       expect(await proxied.getLightNumber()).to.eq("43");
+
+      await proxied.updateSupply("122");
+      expect(await proxied.getTotalSupply()).to.eq("122");
+
+      await proxied.updateBalances(other.address, "043");
+      expect(await proxied.getBalances(other.address)).to.eq("043");
     })
   })
 
